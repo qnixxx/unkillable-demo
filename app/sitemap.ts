@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { product } from "@/lib/config";
 
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: product.url, changeFrequency: "weekly", priority: 1 },
