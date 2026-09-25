@@ -1,0 +1,2 @@
+import { ContentPage } from "@/components/marketing/content-page";
+export default function Page(){return <ContentPage eyebrow="Company" title="WHY UNKILLABLE EXISTS."><p>Most systems are designed for the week where everything goes right. Unkillable is designed for the week that gets interrupted.</p><p>The product is built around a quieter standard: keep useful commitments, reduce them when necessary, recover quickly after misses, and build evidence that you can rely on yourself.</p></ContentPage>}

@@ -16,13 +16,13 @@ export const metadata: Metadata = {
     title: product.title,
     description: product.description,
     siteName: product.name,
-    images: [{ url: `${basePath}/og.png`, width: 1200, height: 630, alt: "Unkillable — Become Harder to Break" }],
+    images: [{ url: `${basePath}/og.svg`, alt: "Unkillable — Become Harder to Break" }],
   },
   twitter: {
     card: "summary_large_image",
     title: product.title,
     description: product.description,
-    images: [`${basePath}/og.png`],
+    images: [`${basePath}/og.svg`],
   },
   icons: {
     icon: `${basePath}/icon.svg`,

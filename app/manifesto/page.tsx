@@ -1,0 +1,2 @@
+import { ContentPage } from "@/components/marketing/content-page";
+export default function Page(){return <ContentPage eyebrow="Manifesto" title="BUILT FOR BAD DAYS."><p>Resilience is not the absence of failure. It is the ability to absorb disruption without letting one bad day become a new direction.</p><p>Strong systems do not demand the same output from every day. They preserve the important behavior at a dose the day can support.</p><p>Keep moving. Recover quickly. Build evidence. Repeat long enough that consistency becomes part of your identity.</p></ContentPage>}

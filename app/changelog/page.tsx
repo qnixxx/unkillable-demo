@@ -1,0 +1,2 @@
+import { ContentPage } from "@/components/marketing/content-page";
+export default function Page(){return <ContentPage eyebrow="Changelog" title="WHAT CHANGED."><p><strong style={{color:"var(--text)"}}>v1.0 — Foundation</strong><br/>Public site, onboarding, Daily Protocol, habit management, Minimum Day, Never Miss Twice framing, six pillars, resilience score, weekly review, analytics, local persistence, responsive navigation, and demo authentication.</p></ContentPage>}
