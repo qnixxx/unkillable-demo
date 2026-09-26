@@ -160,6 +160,7 @@ export function createSeedData(): AppData {
       reminders: true,
       reminderTime: "20:30",
       displayName: "Alex",
+      timezone: "Europe/Amsterdam",
     },
   };
 }

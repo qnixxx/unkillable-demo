@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { AppDataProvider, useAppData } from "@/components/app/data-provider";
 import { pillarDefinitions } from "@/lib/config";
 import type { Habit, Pillar } from "@/types";
-import { createLocalSession } from "@/lib/session";
 import { successHaptic } from "@/lib/native";
 
 const goals = ["Physical health", "Discipline", "Focus", "Stress", "Relationships", "Work", "Confidence", "Life in general"];
@@ -34,6 +33,8 @@ function Flow() {
   const [selectedDisruptors, setSelectedDisruptors] = useState<string[]>(["Stress", "Missing one day"]);
   const [selectedHabits, setSelectedHabits] = useState<string[]>(foundations.slice(0, 5).map((item) => item.title));
   const [minimums, setMinimums] = useState<Record<string, string>>(() => Object.fromEntries(foundations.map((item) => [item.title, item.minimumVersion])));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const chosen = useMemo(() => foundations.filter((habit) => selectedHabits.includes(habit.title)), [selectedHabits]);
   const canContinue = step === 1 ? selectedGoals.length > 0 : step === 2 ? selectedDisruptors.length > 0 : step === 3 ? selectedHabits.length > 0 : true;
@@ -42,16 +43,23 @@ function Flow() {
     setList(list.includes(value) ? list.filter((item) => item !== value) : [...list, value]);
   }
 
-  function finish() {
-    completeOnboarding({
-      goals: selectedGoals,
-      disruptors: selectedDisruptors,
-      habits: chosen.map((habit) => ({ ...habit, minimumVersion: minimums[habit.title] || habit.minimumVersion })),
-    });
-    createLocalSession();
-    void successHaptic();
-    router.push("/app");
-    router.refresh();
+  async function finish() {
+    setSaving(true);
+    setError("");
+    try {
+      await completeOnboarding({
+        goals: selectedGoals,
+        disruptors: selectedDisruptors,
+        habits: chosen.map((habit) => ({ ...habit, minimumVersion: minimums[habit.title] || habit.minimumVersion })),
+      });
+      void successHaptic();
+      router.push("/app");
+      router.refresh();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to save your system.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return <main id="main-content" className="onboarding-shell">
@@ -77,10 +85,13 @@ function Flow() {
       {step === 5 && <>
         <p className="eyebrow">05 / Ready</p><h1>YOUR SYSTEM IS READY.</h1><p className="lead">You do not need a perfect week. You need a system you can return to.</p>
         <div className="ready-card"><h2>Start with proof, not pressure.</h2><div className="ready-stat-grid"><div className="ready-stat"><strong>{chosen.length}</strong><span>active commitments</span></div><div className="ready-stat"><strong>6</strong><span>resilience pillars</span></div><div className="ready-stat"><strong>1</strong><span>Minimum Day protocol</span></div></div></div>
+        {error && <p className="form-error" role="alert">{error}</p>}
       </>}
       <div className="onboarding-actions">
-        <button className="button" type="button" onClick={() => setStep((current) => Math.max(1, current - 1))} disabled={step === 1}>Back</button>
-        {step < 5 ? <button className="button button-primary" type="button" onClick={() => setStep((current) => Math.min(5, current + 1))} disabled={!canContinue}>Continue →</button> : <button className="button button-primary" type="button" onClick={finish}>Start Day 1 →</button>}
+        <button className="button" type="button" onClick={() => setStep((current) => Math.max(1, current - 1))} disabled={step === 1 || saving}>Back</button>
+        {step < 5
+          ? <button className="button button-primary" type="button" onClick={() => setStep((current) => Math.min(5, current + 1))} disabled={!canContinue || saving}>Continue →</button>
+          : <button className="button button-primary" type="button" onClick={() => void finish()} disabled={saving}>{saving ? "Saving…" : "Start Day 1 →"}</button>}
       </div>
     </section>
   </main>;

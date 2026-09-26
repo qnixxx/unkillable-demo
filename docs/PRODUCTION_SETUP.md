@@ -1,64 +1,71 @@
 # Unkillable production foundation
 
-This branch is a staging area for the real cloud-backed product. The public investor demo remains untouched on `main`.
+The public investor demo remains on `main`. Production work is isolated from it.
 
-## Architecture
+## Backend
+
+Hosted Supabase project:
+
+- Project name: `unkillable-prod`
+- Region: `eu-central-1` (Frankfurt)
+- Project ref: `sztraqxqwtnebxkjdlsw`
+- Current project cost at creation: $0/month
+
+The application uses:
 
 - Next.js 16 server deployment (not static export)
 - Supabase Auth + Postgres
 - `@supabase/ssr` cookie-based browser/server clients
 - Row Level Security on every user-data table
-- Publishable key only in browser code
-- No service-role/secret key in client bundles
-- Cloud persistence for habits, completions, Minimum Days, settings, and reviews
+- modern publishable keys in browser code
+- no service-role/secret key in browser bundles
+- cloud persistence for habits, completions, Minimum Days, profile/settings, and weekly review storage
 
 ## Environment
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_SUPABASE_URL=https://sztraqxqwtnebxkjdlsw.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<project publishable key>
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-Use Supabase's modern `sb_publishable_...` key. Never put a secret or service-role key in a `NEXT_PUBLIC_` variable.
+Never place a Supabase secret/service-role key in a `NEXT_PUBLIC_` variable or Git.
 
-## Auth configuration after the hosted project exists
+## Auth URL configuration
 
-Set the Supabase Auth Site URL to the production web origin and add localhost + staging origins as redirect URLs.
+Before beta, set the hosted Supabase Auth Site URL to the real application origin and allow these redirect patterns:
 
-For cookie-based SSR confirmation flows, customize the hosted Supabase email templates:
+- local: `http://localhost:3000/**`
+- staging: your staging deployment origin
+- production: the production application origin
 
-### Confirm signup
+The app sends email confirmations and password recovery back through:
 
-```html
-<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/onboarding">
-  Confirm email
-</a>
+```text
+/auth/confirm
 ```
 
-### Password recovery
+That route accepts current Supabase PKCE `code` callbacks and token-hash confirmation links, exchanges them for a cookie-backed session, and then redirects to onboarding or password reset.
 
-```html
-<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password">
-  Reset password
-</a>
-```
-
-For a public launch, configure custom SMTP rather than relying on Supabase's trial email sender.
+For public launch, configure custom SMTP instead of relying on the Supabase trial mail service.
 
 ## Database
 
-`supabase/schema.sql` is the reviewed schema blueprint. Before launch:
+Live migrations:
 
-1. Apply it to the dedicated project.
-2. Verify every table has RLS enabled.
-3. Test two accounts against one another for cross-user reads/writes.
-4. Run Supabase security and performance advisors.
-5. Generate committed TypeScript database types from the live project.
-6. Turn the final schema into migration history in the private production repository.
+1. `20260926082513_initial_unkillable_schema.sql`
+2. `20260926082554_add_completion_owner_index.sql`
+
+All seven public user-data tables have RLS enabled. The initial Supabase security advisor pass returned no findings.
+
+Generated live database types are committed at:
+
+```text
+types/database.ts
+```
 
 ## Production repository
 
-Create a private GitHub repository named `unkillable-prod`. Copy this branch into it and keep `unkillable-demo` as the stable public investor experience.
+Create a private GitHub repository named `unkillable-prod`. Copy the `production-foundation` branch into it and keep `unkillable-demo` as the stable public investor experience.
 
-Do not store Supabase secret keys, payment provider secrets, webhook signing secrets, or SMTP credentials in Git.
+Do not store Supabase secret keys, payment provider secrets, webhook signing secrets, SMTP credentials, or Apple credentials in Git.

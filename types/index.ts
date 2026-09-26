@@ -66,6 +66,7 @@ export interface UserSettings {
   reminders: boolean;
   reminderTime: string;
   displayName: string;
+  timezone: string;
 }
 
 export interface AppData {

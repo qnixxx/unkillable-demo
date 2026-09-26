@@ -12,9 +12,16 @@ export const metadata: Metadata = {
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getClaims();
+  const { data: claimsData, error } = await supabase.auth.getClaims();
 
-  if (error || !data?.claims) redirect("/sign-in");
+  if (error || !claimsData?.claims) redirect("/sign-in");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("onboarding_complete")
+    .maybeSingle();
+
+  if (!profile?.onboarding_complete) redirect("/onboarding");
 
   return (
     <AppDataProvider>
